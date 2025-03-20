@@ -1,0 +1,26 @@
+name: Update JSON File
+
+on:
+  workflow_dispatch: # 수동 실행 가능
+  repository_dispatch: # 웹사이트에서 실행 요청 가능
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: JSON 파일 수정
+        run: |
+          echo '{"info1": "Updated Value", "info2": "New Data"}' > data.json
+
+      - name: 변경 사항 커밋 & 푸시
+        env:
+          TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add data.json
+          git commit -m "Update data.json via GitHub Actions"
+          git push https://x-access-token:$TOKEN@github.com/${{ github.repository }}.git
