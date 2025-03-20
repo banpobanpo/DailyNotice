@@ -8,19 +8,24 @@
         const repoOwner = "banpobanpo";  // 본인 GitHub ID
         const repoName = "DailyNotice";  // JSON 파일이 있는 저장소 이름
         const filePath = "data.json";  // JSON 파일 경로
-        const accessToken = "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";  // GitHub Personal Access Token (보안 유의!)
 
         // 1. JSON 데이터 불러오기
         async function loadData() {
-            const response = await fetch(`https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${filePath}`);
-            const data = await response.json();
-            
-            let content = "<h2>현재 데이터</h2><ul>";
-            Object.keys(data).forEach(key => {
-                content += `<li><b>${key}:</b> ${data[key]}</li>`;
-            });
-            content += "</ul>";
-            document.getElementById("dataDisplay").innerHTML = content;
+            try {
+                const response = await fetch(`https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${filePath}`);
+                if (!response.ok) throw new Error("데이터 로드 실패");
+                const data = await response.json();
+
+                let content = "<h2>📌 현재 데이터</h2><ul>";
+                Object.keys(data).forEach(key => {
+                    content += `<li><b>${key}:</b> ${data[key]}</li>`;
+                });
+                content += "</ul>";
+                document.getElementById("dataDisplay").innerHTML = content;
+            } catch (error) {
+                console.error(error);
+                document.getElementById("dataDisplay").innerText = "데이터를 불러올 수 없습니다.";
+            }
         }
 
         // 2. 관리자 모드 - 데이터 수정 폼 표시
@@ -35,48 +40,27 @@
 
         // 3. GitHub API를 이용한 JSON 파일 업데이트
         async function updateData() {
-        let updatedData = {};
-        for (let i = 1; i <= 16; i++) {
-            updatedData[`info${i}`] = document.getElementById(`info${i}`).value;
-        }
+            let updatedData = {};
+            for (let i = 1; i <= 16; i++) {
+                updatedData[`info${i}`] = document.getElementById(`info${i}`).value;
+            }
 
-        console.log("🔹 업데이트할 데이터:", updatedData); // 디버깅
-
-        // 기존 JSON 파일의 SHA 값 가져오기
-        const getFile = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
-            headers: { "Authorization": `token ${accessToken}` }
-        });
-
-        if (!getFile.ok) {
-            console.error("❌ 파일을 가져오는 데 실패했습니다.", await getFile.text());
-            alert("파일을 가져오는 데 실패했습니다. GitHub Token 및 Repository 설정을 확인하세요.");
-            return;
-        }
-
-        const fileData = await getFile.json();
-        const sha = fileData.sha;
-        console.log("🔹 현재 SHA 값:", sha);
-
-        const updatePayload = {
-            message: "Update data.json",
-            content: btoa(JSON.stringify(updatedData, null, 2)),  // Base64 인코딩
-            sha: sha
-        };
-
-        const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
-            method: "PUT",
-            headers: {
-                "Authorization": `token ${accessToken}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(updatePayload)
-        });
+            const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/dispatches`, {
+                method: "POST",
+                headers: {
+                    "Accept": "application/vnd.github.v3+json",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    event_type: "update-json",
+                    client_payload: { updatedData }
+                })
+            });
 
             if (response.ok) {
-                alert("데이터가 성공적으로 업데이트되었습니다.");
-                loadData();
+                alert("✅ 데이터가 업데이트 요청되었습니다!");
             } else {
-                alert("업데이트 실패");
+                alert("❌ 업데이트 실패!");
             }
         }
 
