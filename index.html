@@ -60,7 +60,8 @@
             if (response.ok) {
                 alert("✅ 데이터가 업데이트 요청되었습니다!");
             } else {
-                alert("❌ 업데이트 실패!");
+                const errorText = await response.text();
+                alert("❌ 업데이트 실패!" ${errorText});
             }
         }
 
