@@ -14,7 +14,7 @@ jobs:
 
       - name: Update Gist data
         run: |
-          GIST_ID="your-gist-id"  # Gist ID 입력
+          GIST_ID="93a1dc4bdca7daf8e121c64f22801b1c"  # Gist ID 입력
           GITHUB_TOKEN="${{ secrets.GH_PAT }}"  # GitHub Secrets에서 토큰 불러오기
           
           # Gist 파일 수정
