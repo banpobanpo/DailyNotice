@@ -1,0 +1,31 @@
+name: Update Gist File
+
+on:
+  repository_dispatch:
+    types: [update-gist]
+
+jobs:
+  update-gist:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Update Gist data
+        run: |
+          GIST_ID="your-gist-id"  # Gist ID 입력
+          GITHUB_TOKEN="${{ secrets.GH_PAT }}"  # GitHub Secrets에서 토큰 불러오기
+          
+          # Gist 파일 수정
+          curl -X PATCH "https://api.github.com/gists/$GIST_ID" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -d '{"files": {"data.json": {"content": "새로운 데이터 내용"}}}'
+          
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add .
+          git commit -m "🔄 Update data.json via GitHub Actions"
+          git push
