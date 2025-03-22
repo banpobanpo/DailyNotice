@@ -49,8 +49,7 @@
             method: "POST",
             headers: {
                 "Accept": "application/vnd.github.v3+json",
-                "Content-Type": "application/json",
-                "Authorization": "token ${{ secrets.GH_PAT }}"
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 event_type: "update-json",
