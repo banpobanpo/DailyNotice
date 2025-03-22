@@ -21,7 +21,7 @@
 
     // Gist에서 데이터 불러오기
     async function loadGistData() {
-      const response = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+      const response = await fetch(`https://api.github.com/gists/93a1dc4bdca7daf8e121c64f22801b1c`);
       const data = await response.json();
       const gistContent = atob(data.files['data.json'].content);  // base64 디코딩
       displayText.textContent = gistContent;  // 페이지에 데이터 표시
