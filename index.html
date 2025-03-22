@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Gist 데이터 관리</title>
+</head>
+<body>
+  <h1>현재 데이터: <span id="displayText">불러오는 중...</span></h1>
+  <input type="text" id="inputField" placeholder="새 텍스트 입력">
+  <button id="saveButton">저장</button>
+
+  <script>
+    const displayText = document.getElementById("displayText");
+    const inputField = document.getElementById("inputField");
+    const saveButton = document.getElementById("saveButton");
+
+    // GitHub Gist API
+    const GIST_ID = 'your-gist-id';  // Gist ID
+    const ACCESS_TOKEN = 'your-github-access-token';  // 이 값은 사용하지 않음. GitHub Actions에서 처리.
+
+    // Gist에서 데이터 불러오기
+    async function loadGistData() {
+      const response = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+      const data = await response.json();
+      const gistContent = atob(data.files['data.json'].content);  // base64 디코딩
+      displayText.textContent = gistContent;  // 페이지에 데이터 표시
+    }
+
+    // GitHub Actions로 데이터 업데이트
+    async function updateData() {
+      const inputText = inputField.value.trim();
+      if (inputText) {
+        // GitHub Actions에서 데이터를 업데이트하도록 트리거
+        const response = await fetch('/github-webhook-url', {  // 웹훅 URL이 필요합니다.
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event_type: 'update-gist',
+            client_payload: { updatedData: inputText }
+          })
+        });
+
+        if (response.ok) {
+          displayText.textContent = inputText;  // 화면에 반영
+          inputField.value = '';  // 입력창 비우기
+        } else {
+          console.error('데이터 업데이트 실패');
+        }
+      }
+    }
+
+    // 페이지 로드 시 Gist 데이터 불러오기
+    loadGistData();
+
+    // 저장 버튼 클릭 시 데이터 저장
+    saveButton.addEventListener('click', updateData);
+  </script>
+</body>
+</html>
