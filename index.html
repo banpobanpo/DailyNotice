@@ -50,6 +50,7 @@
             headers: {
                 "Accept": "application/vnd.github.v3+json",
                 "Content-Type": "application/json",
+                "Authorization": "${{ secrets.GH_PAT }}"
             },
             body: JSON.stringify({
                 event_type: "update-json",
